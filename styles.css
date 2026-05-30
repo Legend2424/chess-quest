@@ -130,8 +130,10 @@ header.appbar {
 /* ============================================================
    DASHBOARD LAYOUT
    ============================================================ */
-.dash { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; }
-@media (max-width: 900px) { .dash { grid-template-columns: 1fr; } }
+.dash { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; align-items: start; }
+.dash-col { display: flex; flex-direction: column; gap: 18px; }
+.dash-col.side { position: sticky; top: 14px; }
+@media (max-width: 900px) { .dash { grid-template-columns: 1fr; } .dash-col.side { position: static; } }
 .span2 { grid-column: 1 / -1; }
 
 .section-title { font-size: 18px; font-weight: 900; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
@@ -150,6 +152,18 @@ header.appbar {
 .streak-badge .flames { position: absolute; top: -16px; font-size: 40px; filter: drop-shadow(0 0 8px #ff7a18); }
 .streak-badge .num { font-family: "Baloo 2"; font-size: 92px; font-weight: 800; line-height: 1; }
 .streak-badge .lbl { position: absolute; bottom: 30px; font-size: 13px; letter-spacing: 2px; color: var(--muted); font-weight: 800; }
+
+/* compact streak (side column) */
+.streak-hero.compact { padding: 18px; }
+.streak-hero.compact .streak-badge { width: 140px; height: 140px; margin: 2px auto; }
+.streak-hero.compact .streak-badge .num { font-size: 62px; }
+.streak-hero.compact .streak-badge .flames { font-size: 28px; top: -10px; }
+.streak-hero.compact .streak-badge .lbl { bottom: 20px; font-size: 10px; }
+.streak-hero.compact .streak-caption { font-size: 15px; }
+.streak-hero.compact .streak-sub { font-size: 12.5px; }
+.streak-hero.compact .pip { width: 14px; height: 14px; }
+.streak-hero.compact .streak-pips { margin-top: 10px; }
+.streak-hero.compact .best-streak { margin-top: 6px; }
 
 /* streak intensity styles */
 .s0 .num { color: #7e87b8; }
@@ -193,10 +207,16 @@ header.appbar {
 .hours-big { font-family: "Baloo 2"; font-size: 56px; font-weight: 800; line-height: 1; }
 .hours-big small { font-size: 22px; color: var(--muted); font-weight: 700; }
 
-.progress-track { position: relative; height: 30px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; margin: 16px 0 8px; }
-.progress-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, var(--kid), var(--kid2)); transition: width .6s cubic-bezier(.2,.8,.2,1); display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; font-weight: 900; font-size: 12px; }
-.tier-ticks { display: flex; justify-content: space-between; margin-top: 6px; }
-.tier-ticks span { font-size: 11px; color: var(--muted); font-weight: 700; }
+.progress-wrap { margin: 18px 0 6px; padding-bottom: 30px; }
+.progress-track { position: relative; height: 26px; border-radius: 999px; background: rgba(255,255,255,.08); }
+.progress-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, var(--kid), var(--kid2)); transition: width .6s cubic-bezier(.2,.8,.2,1); z-index: 1; box-shadow: 0 0 14px var(--kid-glow); }
+.tier-mark { position: absolute; top: -5px; bottom: -5px; transform: translateX(-50%); z-index: 2; }
+.tier-mark .tm-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; transform: translateX(-50%); background: rgba(255,255,255,.35); border-radius: 2px; }
+.tier-mark.reached .tm-line { background: var(--tc); box-shadow: 0 0 8px var(--tc); width: 3px; }
+.tier-mark .tm-lbl { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; color: var(--muted); font-weight: 700; display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.tier-mark .tm-lbl b { font-weight: 800; }
+.tier-mark.reached .tm-lbl { color: var(--tc); }
+.axis { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--muted); font-weight: 800; }
 .next-tier-msg { margin-top: 12px; font-weight: 800; font-size: 15px; }
 .next-tier-msg b { color: var(--kid2); }
 

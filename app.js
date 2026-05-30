@@ -323,10 +323,14 @@ function renderFoot() {
 /* ---------- DASHBOARD ---------- */
 function renderDashboard() {
   return `<div class="dash">
-    ${renderStreakHero()}
-    ${renderWeekProgress()}
-    ${renderAddActivity()}
-    ${renderWeekLog()}
+    <div class="dash-col main">
+      ${renderAddActivity()}
+      ${renderWeekLog()}
+    </div>
+    <div class="dash-col side">
+      ${renderStreakHero()}
+      ${renderWeekProgress()}
+    </div>
   </div>`;
 }
 
@@ -356,7 +360,7 @@ function renderStreakHero() {
   else { caption = `${current}-week Gold streak!`; sub = `${MAX_STREAK - current} more Gold weeks to MAX`; }
 
   return `
-  <section class="panel streak-hero span2">
+  <section class="panel streak-hero compact">
     <div class="section-title">🔥 Your Streak</div>
     <div class="streak-badge ${streakClass(current)}">
       <div class="flames">${flameStr(current)}</div>
@@ -378,8 +382,16 @@ function renderWeekProgress() {
   const tier = tierFor(h);
   const nt = nextTier(h);
   const isCurrent = monday === mondayOf(todayStr());
-  const maxH = TIERS[TIERS.length - 1].hours;
-  const pct = Math.min(100, (h / maxH) * 100);
+  const AXIS = 20; // progress bar runs 0 -> 20 hours
+  const pct = Math.min(100, (h / AXIS) * 100);
+  const marks = TIERS.slice(1).map(t => {
+    const left = (t.hours / AXIS) * 100;
+    const reached = h >= t.hours;
+    return `<div class="tier-mark ${reached ? "reached" : ""}" style="left:${left}%; --tc:${t.color}">
+      <span class="tm-line"></span>
+      <span class="tm-lbl">${t.icon}<b>${t.hours}h</b></span>
+    </div>`;
+  }).join("");
 
   let msg;
   if (nt) {
@@ -411,8 +423,6 @@ function renderWeekProgress() {
         </div>`).join("")}</div>`
     : "";
 
-  const ticks = TIERS.slice(1).map(t => `<span>${t.icon}${t.hours}h</span>`).join("");
-
   return `
   <section class="panel">
     <div class="week-head">
@@ -427,8 +437,13 @@ function renderWeekProgress() {
       <div class="hours-big">${hrsLabel(min)}<small>hrs</small></div>
       <div class="tier-badge" style="color:${tier.color}">${tier.icon} ${tier.label}</div>
     </div>
-    <div class="progress-track"><div class="progress-fill" style="width:${pct}%">${pct > 14 ? hrsLabel(min) + "h" : ""}</div></div>
-    <div class="tier-ticks">${ticks}</div>
+    <div class="progress-wrap">
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${pct}%"></div>
+        ${marks}
+      </div>
+      <div class="axis"><span>0h</span><span>20h</span></div>
+    </div>
     ${msg}
     ${projNote}
     ${breakdown}
