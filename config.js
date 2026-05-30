@@ -12,6 +12,6 @@
 //  How to get these: see README.md  ->  "1. Set up the cloud".
 // ============================================================
 window.CHESS_CONFIG = {
-  supabaseUrl: "",      // e.g. "https://abcd1234.supabase.co"
-  supabaseAnonKey: ""   // e.g. "eyJhbGciOi...."  (long string)
+  supabaseUrl: "https://eaiodmgswcwemtfzdkfa.supabase.co",
+  supabaseAnonKey: "sb_publishable_-IAecfI4zhs506M2vT1Eng_V_63Xiis"
 };
