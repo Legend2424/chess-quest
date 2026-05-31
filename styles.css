@@ -29,6 +29,7 @@
 
 body.kid-minka { --kid: #c061f0; --kid2: #ff7ad9; --kid-glow: rgba(192, 97, 240, 0.55); }
 body.kid-david { --kid: #3aa0ff; --kid2: #46e6c0; --kid-glow: rgba(58, 160, 255, 0.55); }
+body.kid-chris { --kid: #ff7a33; --kid2: #ffc23d; --kid-glow: rgba(255, 122, 51, 0.55); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -99,6 +100,7 @@ button:focus-visible { outline: 3px solid var(--kid2); outline-offset: 2px; }
 .kid-card .sub { color: var(--muted); font-size: 15px; }
 .kid-card.minka .avatar { background: linear-gradient(135deg,#c061f0,#ff7ad9); }
 .kid-card.david .avatar { background: linear-gradient(135deg,#3aa0ff,#46e6c0); }
+.kid-card.chris .avatar { background: linear-gradient(135deg,#ff7a33,#ff5ea0); }
 .kid-card .mini-flame { font-size: 22px; }
 
 /* ============================================================
@@ -118,6 +120,9 @@ header.appbar {
 .who .who-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; }
 .who.minka .who-avatar { background: linear-gradient(135deg,#c061f0,#ff7ad9); }
 .who.david .who-avatar { background: linear-gradient(135deg,#3aa0ff,#46e6c0); }
+.who.chris .who-avatar { background: linear-gradient(135deg,#ff7a33,#ff5ea0); }
+
+.jr-badge { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(255,194,61,.18); color: #ffd86b; border: 1px solid rgba(255,194,61,.4); vertical-align: middle; }
 .who .who-name { font-weight: 800; }
 .who .switch { background: var(--kid); color: #fff; border-radius: 999px; padding: 8px 14px; font-weight: 800; font-size: 13px; }
 .who .switch:hover { filter: brightness(1.1); }

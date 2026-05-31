@@ -10,13 +10,18 @@ It is a plain static website (HTML/CSS/JS) — **no build step, no Node.js neede
 
 ## What it does
 
-- **Profiles** for Minka & David (each with their own colour theme).
+- **Profiles** for Minka, David & Chris (each with their own colour theme).
 - **Log activities** for any day of the week: Lesson · Ana, Lesson · Corno,
   Game, Tournament, Puzzles, Studies (with quick duration buttons + custom).
-- **Weekly tiers** by hours: 🥉 Bronze 4h · 🥈 Silver 6h · 🥇 Gold 10h ·
-  💠 Platinum 12h · 💎 Diamond 15h. A progress bar shows *"X h more to next tier"*.
-- **Streak** that grows every week you reach **Gold+** (max 10). Silver loses 1,
-  Bronze / missed week loses 2. The badge looks cooler the higher you go 🔥🌈.
+- **Weekly tiers** by hours, with two scales:
+  - **Standard** (Minka & David): 🥉 Bronze 4h · 🥈 Silver 6h · 🥇 Gold 8h ·
+    💠 Platinum 10h · 💎 Diamond 15h.
+  - **Junior** (Chris, age 6): 🥉 2h · 🥈 4h · 🥇 6h · 💠 8h · 💎 10h.
+
+  A progress bar shows *"X h more to next tier"*.
+- **Streak** that grows every week you reach **Gold+** (max 10). Diamond gives a
+  **double bump (+2)**, Gold/Platinum +1, Silver −1, Bronze / missed week −2. The
+  badge looks cooler the higher you go 🔥🌈.
 - **Rewards ledger** — each finished Gold+ week earns rand based on streak level
   (1–2 → R20, 3–4 → R50, 5–6 → R100, 7–9 → R150, 10 → R200). Parent ticks
   "Mark paid" (optionally behind a parent PIN). Tracks earned / paid / owed.
@@ -94,9 +99,10 @@ same cloud database as your local copy.
 
 All the rules live at the top of [`app.js`](app.js) and are easy to change:
 
-- `TIERS` — hours required for each tier.
+- `TIER_SETS` — hours required for each tier (standard & junior scales).
+- `KIDS` — the kids and which tier scale each uses.
 - `rewardFor()` — rand amounts per streak level.
-- `streakDelta()` — how much each tier gains/loses on the streak.
+- `streakChange()` — how much each tier gains/loses on the streak.
 - `MAX_STREAK`, `CURRENCY`, `ACTIVITIES` — the rest of the knobs.
 
 ---
@@ -105,9 +111,10 @@ All the rules live at the top of [`app.js`](app.js) and are easy to change:
 
 - A **week runs Monday → Sunday**. The "current" week is in progress; completed
   weeks are locked in for the streak.
-- The streak is recomputed every completed week: Gold+ adds 1 (max 10), Silver
-  subtracts 1, Bronze **or a week with no chess** subtracts 2 (never below 0).
-  So skipping a week hurts — that's intentional, to encourage consistency.
+- The streak is recomputed every completed week: **Diamond adds 2**, Gold/Platinum
+  add 1 (max 10), Silver subtracts 1, Bronze **or a week with no chess** subtracts 2
+  (never below 0). So skipping a week hurts — that's intentional, to encourage
+  consistency.
 - You **earn rand only in finished weeks where you reached Gold+**, and the amount
   follows your streak level *after* that week. Below-Gold weeks pay nothing.
 

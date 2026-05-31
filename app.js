@@ -6,8 +6,9 @@
 
 /* ---------------- constants ---------------- */
 const KIDS = {
-  minka: { name: "Minka", emoji: "🦄", color: "#c061f0" },
-  david: { name: "David", emoji: "🐉", color: "#3aa0ff" },
+  minka: { name: "Minka", emoji: "🦄", color: "#c061f0", tierSet: "standard" },
+  david: { name: "David", emoji: "🐉", color: "#3aa0ff", tierSet: "standard" },
+  chris: { name: "Chris", emoji: "🦖", color: "#ff7a33", tierSet: "junior", junior: true },
 };
 
 const ACTIVITIES = [
@@ -20,16 +21,26 @@ const ACTIVITIES = [
 ];
 const ACT_BY_ID = Object.fromEntries(ACTIVITIES.map(a => [a.id, a]));
 
-// tiers (ascending). hours = minimum hours to reach the tier.
-const TIERS = [
-  { id: "none",     label: "No tier",  hours: 0,  color: "var(--none)",     icon: "▫️" },
-  { id: "bronze",   label: "Bronze",   hours: 4,  color: "var(--bronze)",   icon: "🥉" },
-  { id: "silver",   label: "Silver",   hours: 6,  color: "var(--silver)",   icon: "🥈" },
-  { id: "gold",     label: "Gold",     hours: 10, color: "var(--gold)",     icon: "🥇" },
-  { id: "platinum", label: "Platinum", hours: 12, color: "var(--platinum)", icon: "💠" },
-  { id: "diamond",  label: "Diamond",  hours: 15, color: "var(--diamond)",  icon: "💎" },
-];
-const GOLD_PLUS = new Set(["gold", "platinum", "diamond"]);
+// tiers (ascending). hoursArr = [bronze, silver, gold, platinum, diamond]
+function makeTiers(h) {
+  return [
+    { id: "none",     label: "No tier",  hours: 0,    color: "var(--none)",     icon: "▫️" },
+    { id: "bronze",   label: "Bronze",   hours: h[0], color: "var(--bronze)",   icon: "🥉" },
+    { id: "silver",   label: "Silver",   hours: h[1], color: "var(--silver)",   icon: "🥈" },
+    { id: "gold",     label: "Gold",     hours: h[2], color: "var(--gold)",     icon: "🥇" },
+    { id: "platinum", label: "Platinum", hours: h[3], color: "var(--platinum)", icon: "💠" },
+    { id: "diamond",  label: "Diamond",  hours: h[4], color: "var(--diamond)",  icon: "💎" },
+  ];
+}
+const TIER_SETS = {
+  standard: { tiers: makeTiers([4, 6, 8, 10, 15]), axis: 20 }, // Minka & David
+  junior:   { tiers: makeTiers([2, 4, 6, 8, 10]),  axis: 12 }, // Chris (age 6)
+};
+function tiersFor(kid) { return TIER_SETS[KIDS[kid].tierSet].tiers; }
+function axisFor(kid)  { return TIER_SETS[KIDS[kid].tierSet].axis; }
+function goldHours(kid) { return tiersFor(kid).find(t => t.id === "gold").hours; }
+
+const GOLD_PLUS = new Set(["gold", "platinum", "diamond"]); // weeks that earn rewards
 const MAX_STREAK = 10;
 const CURRENCY = "R";
 
@@ -42,11 +53,12 @@ function rewardFor(level) {
   if (level >= 1) return 20;
   return 0;
 }
-/* how a tier changes the streak */
-function streakDelta(tierId) {
-  if (GOLD_PLUS.has(tierId)) return +1;   // capped to MAX later
+/* how a tier changes the streak (Diamond = double bump) */
+function streakChange(tierId) {
+  if (tierId === "diamond") return +2;             // double jump!
+  if (tierId === "gold" || tierId === "platinum") return +1;
   if (tierId === "silver") return -1;
-  return -2;                              // bronze or no tier = missed week
+  return -2;                                        // bronze or no tier = missed week
 }
 
 /* ---------------- date helpers (Monday-based weeks) ---------------- */
@@ -192,13 +204,14 @@ function weekMinutes(kid, monday) {
 function dayMinutes(kid, day) {
   return kidActs(kid).filter(a => a.date === day).reduce((s, a) => s + a.minutes, 0);
 }
-function tierFor(hours) {
-  let t = TIERS[0];
-  for (const tt of TIERS) if (hours >= tt.hours) t = tt;
+function tierFor(kid, hours) {
+  const tiers = tiersFor(kid);
+  let t = tiers[0];
+  for (const tt of tiers) if (hours >= tt.hours) t = tt;
   return t;
 }
-function nextTier(hours) {
-  for (const tt of TIERS) if (hours < tt.hours) return tt;
+function nextTier(kid, hours) {
+  for (const tt of tiersFor(kid)) if (hours < tt.hours) return tt;
   return null; // maxed
 }
 
@@ -215,9 +228,8 @@ function streakSeries(kid) {
   for (let i = 0; i < 600 && w <= lastCompleted; i++, w = addDays(w, 7)) {
     const min = weekMinutes(kid, w);
     const h = hrs(min);
-    const tier = tierFor(h);
-    if (GOLD_PLUS.has(tier.id)) streak = Math.min(MAX_STREAK, streak + 1);
-    else streak = Math.max(0, streak + streakDelta(tier.id));
+    const tier = tierFor(kid, h);
+    streak = Math.max(0, Math.min(MAX_STREAK, streak + streakChange(tier.id)));
     best = Math.max(best, streak);
     const reward = GOLD_PLUS.has(tier.id) ? rewardFor(streak) : 0;
     series.push({ week: w, minutes: min, hours: h, tier, streak, reward });
@@ -231,10 +243,8 @@ function currentWeekProjection(kid) {
   const cur = mondayOf(todayStr());
   const min = weekMinutes(kid, cur);
   const h = hrs(min);
-  const tier = tierFor(h);
-  let projected;
-  if (GOLD_PLUS.has(tier.id)) projected = Math.min(MAX_STREAK, base + 1);
-  else projected = Math.max(0, base + streakDelta(tier.id));
+  const tier = tierFor(kid, h);
+  const projected = Math.max(0, Math.min(MAX_STREAK, base + streakChange(tier.id)));
   const reward = GOLD_PLUS.has(tier.id) ? rewardFor(projected) : 0;
   return { base, minutes: min, hours: h, tier, projected, reward };
 }
@@ -355,7 +365,7 @@ function renderStreakHero() {
   const reward = rewardFor(current);
   const pips = Array.from({ length: MAX_STREAK }, (_, i) => `<div class="pip ${i < current ? "on" : ""}"></div>`).join("");
   let caption, sub;
-  if (current <= 0) { caption = "No streak yet"; sub = "Reach Gold (10h) this week to start a streak!"; }
+  if (current <= 0) { caption = "No streak yet"; sub = `Reach Gold (${goldHours(state.kid)}h) this week to start a streak!`; }
   else if (current >= MAX_STREAK) { caption = "MAX STREAK! 🏆"; sub = "You are unstoppable — keep it going!"; }
   else { caption = `${current}-week Gold streak!`; sub = `${MAX_STREAK - current} more Gold weeks to MAX`; }
 
@@ -379,12 +389,12 @@ function renderWeekProgress() {
   const monday = state.weekStart;
   const min = weekMinutes(state.kid, monday);
   const h = hrs(min);
-  const tier = tierFor(h);
-  const nt = nextTier(h);
+  const tier = tierFor(state.kid, h);
+  const nt = nextTier(state.kid, h);
   const isCurrent = monday === mondayOf(todayStr());
-  const AXIS = 20; // progress bar runs 0 -> 20 hours
+  const AXIS = axisFor(state.kid); // progress bar full-scale hours
   const pct = Math.min(100, (h / AXIS) * 100);
-  const marks = TIERS.slice(1).map(t => {
+  const marks = tiersFor(state.kid).slice(1).map(t => {
     const left = (t.hours / AXIS) * 100;
     const reached = h >= t.hours;
     return `<div class="tier-mark ${reached ? "reached" : ""}" style="left:${left}%; --tc:${t.color}">
@@ -405,7 +415,8 @@ function renderWeekProgress() {
   let projNote = "";
   if (isCurrent) {
     const p = currentWeekProjection(state.kid);
-    if (GOLD_PLUS.has(p.tier.id)) projNote = `<div class="streak-sub" style="margin-top:8px">✅ Gold+ this week → streak goes to <b>${p.projected}</b> (earn ${CURRENCY}${p.reward})</div>`;
+    if (p.tier.id === "diamond") projNote = `<div class="streak-sub" style="margin-top:8px">💎 Diamond! <b>DOUBLE</b> streak jump to <b>${p.projected}</b> (earn ${CURRENCY}${p.reward}) 🚀</div>`;
+    else if (GOLD_PLUS.has(p.tier.id)) projNote = `<div class="streak-sub" style="margin-top:8px">✅ Gold+ this week → streak goes to <b>${p.projected}</b> (earn ${CURRENCY}${p.reward})</div>`;
     else projNote = `<div class="streak-sub" style="margin-top:8px">⚠️ Below Gold → streak would ${p.projected < p.base ? "drop to " + p.projected : "stay " + p.projected}. Reach Gold to keep it climbing!</div>`;
   }
 
@@ -426,7 +437,7 @@ function renderWeekProgress() {
   return `
   <section class="panel">
     <div class="week-head">
-      <div class="section-title">📈 This Week</div>
+      <div class="section-title">📈 This Week ${KIDS[state.kid].junior ? '<span class="jr-badge">👶 Junior</span>' : ""}</div>
       <div class="week-nav">
         <button data-week="-1" title="Previous week">‹</button>
         <div class="week-label">Week ${isoWeek(monday)}<small>${monthDay(monday)} – ${monthDay(addDays(monday, 6))}${isCurrent ? " · now" : ""}</small></div>
@@ -542,7 +553,7 @@ function renderHistory() {
   // also include current (in progress) week
   const curMon = mondayOf(todayStr());
   const curMin = weekMinutes(state.kid, curMon);
-  if (!byWeek[curMon]) byWeek[curMon] = { week: curMon, minutes: curMin, hours: hrs(curMin), tier: tierFor(hrs(curMin)) };
+  if (!byWeek[curMon]) byWeek[curMon] = { week: curMon, minutes: curMin, hours: hrs(curMin), tier: tierFor(state.kid, hrs(curMin)) };
 
   // build all Mondays whose ISO-week belongs to this calendar year-ish:
   // simplest: iterate Mondays of the year
@@ -554,7 +565,7 @@ function renderHistory() {
     const rec = byWeek[w];
     const min = rec ? rec.minutes : weekMinutes(state.kid, w);
     const h = hrs(min);
-    const tier = tierFor(h);
+    const tier = tierFor(state.kid, h);
     const isFuture = w > curMon;
     const isCur = w === curMon;
     cells.push({ w, wn, min, h, tier, isFuture, isCur });
@@ -577,7 +588,7 @@ function renderHistory() {
   const totalH = cells.reduce((s, c) => s + c.h, 0);
   const bestWeek = cells.reduce((m, c) => c.h > m ? c.h : m, 0);
 
-  const legend = TIERS.map(t => `<span class="lg"><span class="sw" style="background:${t.color}"></span>${t.icon} ${t.label}${t.hours?` (${t.hours}h)`:""}</span>`).join("");
+  const legend = tiersFor(state.kid).map(t => `<span class="lg"><span class="sw" style="background:${t.color}"></span>${t.icon} ${t.label}${t.hours?` (${t.hours}h)`:""}</span>`).join("");
 
   return `
   <section class="panel span2">
@@ -721,13 +732,13 @@ async function onAdd() {
   if (!minutes || minutes <= 0) return;
 
   // tier before/after for celebration
-  const before = tierFor(hrs(weekMinutes(state.kid, mondayOf(state.sel.day))));
+  const before = tierFor(state.kid, hrs(weekMinutes(state.kid, mondayOf(state.sel.day))));
 
   const rec = { id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
     kid: state.kid, date: state.sel.day, type: a.id, minutes };
   await Store.addActivity(rec);
 
-  const after = tierFor(hrs(weekMinutes(state.kid, mondayOf(state.sel.day))));
+  const after = tierFor(state.kid, hrs(weekMinutes(state.kid, mondayOf(state.sel.day))));
 
   // reset duration selection (keep day + activity for fast multi-entry)
   state.sel.minutes = null; state.sel.custom = "";
