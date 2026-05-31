@@ -7,9 +7,16 @@
 /* ---------------- constants ---------------- */
 const KIDS = {
   minka: { name: "Minka", emoji: "🦄", color: "#c061f0", tierSet: "standard" },
-  david: { name: "David", emoji: "🐉", color: "#3aa0ff", tierSet: "standard" },
-  chris: { name: "Chris", emoji: "🦖", color: "#ff7a33", tierSet: "junior", junior: true },
+  david: { name: "David", emoji: "🐉", color: "#3aa0ff", tierSet: "standard", photo: "assets/David.jpeg" },
+  chris: { name: "Chris", emoji: "🦖", color: "#ff7a33", tierSet: "junior", junior: true, photo: "assets/Chris.jpeg" },
 };
+
+// avatar markup: photo when available, otherwise the emoji fallback
+function avatarInner(k) {
+  return k.photo
+    ? `<img src="${k.photo}" alt="${k.name}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${k.emoji}'}))">`
+    : k.emoji;
+}
 
 const ACTIVITIES = [
   { id: "lesson_ana",   label: "Lesson · Ana",   icon: "👩‍🏫", fixed: 60 },
@@ -288,7 +295,7 @@ function renderPicker() {
           const proj = state.activities.length ? streakSeries(id).current : 0;
           return `
           <button class="kid-card ${id}" data-kid="${id}">
-            <div class="avatar">${k.emoji}</div>
+            <div class="avatar">${avatarInner(k)}</div>
             <div class="name">${k.name}</div>
             <div class="mini-flame">${proj > 0 ? "🔥".repeat(Math.min(5, Math.ceil(proj / 2))) + " streak " + proj : "Tap to start!"}</div>
             <div class="sub">Tap to open</div>
@@ -316,7 +323,7 @@ function renderHeader() {
       ${tab("rewards", "Rewards", "💰")}
     </div>
     <div class="who ${state.kid}">
-      <div class="who-avatar">${k.emoji}</div>
+      <div class="who-avatar">${avatarInner(k)}</div>
       <div class="who-name">${k.name}</div>
       <button class="switch" data-switch>Switch</button>
     </div>

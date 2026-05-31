@@ -94,8 +94,9 @@ button:focus-visible { outline: 3px solid var(--kid2); outline-offset: 2px; }
 .kid-card:hover { transform: translateY(-8px) scale(1.03); }
 .kid-card .avatar {
   width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center;
-  font-size: 64px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  font-size: 64px; box-shadow: 0 8px 24px rgba(0,0,0,.4); overflow: hidden;
 }
+.kid-card .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .kid-card .name { font-family: "Baloo 2"; font-size: 30px; font-weight: 800; }
 .kid-card .sub { color: var(--muted); font-size: 15px; }
 .kid-card.minka .avatar { background: linear-gradient(135deg,#c061f0,#ff7ad9); }
@@ -117,7 +118,8 @@ header.appbar {
   background: var(--panel); border: 1px solid var(--panel-border);
   padding: 8px 8px 8px 16px; border-radius: 999px;
 }
-.who .who-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; }
+.who .who-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; overflow: hidden; }
+.who .who-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .who.minka .who-avatar { background: linear-gradient(135deg,#c061f0,#ff7ad9); }
 .who.david .who-avatar { background: linear-gradient(135deg,#3aa0ff,#46e6c0); }
 .who.chris .who-avatar { background: linear-gradient(135deg,#ff7a33,#ff5ea0); }
