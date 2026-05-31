@@ -18,9 +18,16 @@ function avatarInner(k) {
     : k.emoji;
 }
 
+// activity icon: mini photo when available (e.g. coaches), otherwise the emoji
+function actIcon(a) {
+  return a.photo
+    ? `<img class="ico-photo" src="${a.photo}" alt="${a.label}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${a.icon}'}))">`
+    : a.icon;
+}
+
 const ACTIVITIES = [
-  { id: "lesson_ana",   label: "Lesson · Ana",   icon: "👩‍🏫", fixed: 60 },
-  { id: "lesson_corno", label: "Lesson · Corno", icon: "🧑‍🏫", fixed: 60 },
+  { id: "lesson_ana",   label: "Lesson · Ana",   icon: "👩‍🏫", fixed: 60, photo: "assets/Ana.jpeg" },
+  { id: "lesson_corno", label: "Lesson · Corno", icon: "🧑‍🏫", fixed: 60, photo: "assets/Corno.jpeg" },
   { id: "game",         label: "Game",           icon: "♟️", options: [15, 30, 45, 60, 90], custom: "min" },
   { id: "tournament",   label: "Tournament",     icon: "🏆", options: [60, 120, 180, 240, 300], custom: "hours" },
   { id: "puzzles",      label: "Puzzles",        icon: "🧩", options: [15, 30] },
@@ -487,7 +494,7 @@ function renderAddActivity() {
 
   const actBtns = ACTIVITIES.map(a =>
     `<button class="act-btn ${state.sel.act === a.id ? "sel" : ""}" data-act="${a.id}">
-      <span class="ico">${a.icon}</span><span class="nm">${a.label}</span>
+      <span class="ico">${actIcon(a)}</span><span class="nm">${a.label}</span>
     </button>`).join("");
 
   // duration chooser
@@ -536,7 +543,7 @@ function renderWeekLog() {
     ? acts.map(a => {
         const def = ACT_BY_ID[a.type] || { icon: "♟️", label: a.type };
         return `<div class="log-item">
-          <span class="ico">${def.icon}</span>
+          <span class="ico">${actIcon(def)}</span>
           <span class="info"><div class="t">${def.label}</div><div class="d">${dowName(a.date)}, ${monthDay(a.date)}</div></span>
           <span class="mins">${hrsLabel(a.minutes)}h</span>
           <button class="del" data-del="${a.id}" title="Remove">✕</button>

@@ -250,6 +250,8 @@ header.appbar {
 .act-btn.sel { border-color: var(--kid); background: linear-gradient(160deg, rgba(255,255,255,.10), var(--kid-glow)); }
 .act-btn .ico { font-size: 30px; }
 .act-btn .nm { font-weight: 800; font-size: 13px; text-align: center; }
+.act-btn .ico-photo { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 4px 10px rgba(0,0,0,.35); border: 2px solid rgba(255,255,255,.18); }
+.log-item .ico-photo { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; display: block; }
 
 .dur-area { margin-top: 14px; }
 .dur-chips { display: flex; gap: 8px; flex-wrap: wrap; }
